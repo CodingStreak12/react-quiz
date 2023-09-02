@@ -10,7 +10,7 @@ import Progress from "./Progress.js";
 import FinishScreen from "./FinishScreen.js";
 import Timer from "./Timer.js";
 
-const SECS_PER_QUESTION = 1;
+const SECS_PER_QUESTION = 30;
 const initialState = {
   questions: [],
   status: "loading",
@@ -18,7 +18,6 @@ const initialState = {
   answer: null,
   points: 0,
   highScore: 0,
-  seconds: 0,
 };
 function reducer(state, action) {
   switch (action.type) {
@@ -30,7 +29,6 @@ function reducer(state, action) {
       return {
         ...state,
         status: "active",
-        seconds: state.questions.length * SECS_PER_QUESTION,
       };
     case "newAnswer":
       const question = state.questions[state.index];
@@ -60,19 +58,11 @@ function reducer(state, action) {
         status: "ready",
         highScore: state.highScore,
       };
-    case "tick":
-      return {
-        ...state,
-        seconds: state.seconds - 1,
-        status: state.seconds === 0 ? "finished" : state.status,
-      };
   }
 }
 export default function App() {
-  const [
-    { questions, status, index, answer, points, highScore, seconds },
-    dispatch,
-  ] = useReducer(reducer, initialState);
+  const [{ questions, status, index, answer, points, highScore }, dispatch] =
+    useReducer(reducer, initialState);
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce(
     (prev, curr) => prev + curr.points,
@@ -116,7 +106,7 @@ export default function App() {
 
             <footer>
               {status === "active" && (
-                <Timer seconds={seconds} dispatch={dispatch} />
+                <Timer dispatch={dispatch} questions={questions} />
               )}
 
               <NextButton

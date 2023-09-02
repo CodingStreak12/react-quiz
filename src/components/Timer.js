@@ -1,16 +1,34 @@
-import { useEffect } from "react";
-export default function ({ dispatch, seconds }) {
-  const minutes = Math.floor(seconds / 60);
-  const second = seconds % 60;
-  useEffect(function () {
-    const id = setInterval(function () {
-      dispatch({ type: "tick" });
-    }, 1000);
+import { useEffect, useState } from "react";
+const SECS_PER_QUESTION = 10;
+export default function ({ dispatch, questions }) {
+  const [secondsRemaining, setSecondsRemaining] = useState(
+    () => questions.length * SECS_PER_QUESTION
+  );
+  const minutes = Math.floor(secondsRemaining / 60);
+  const second = secondsRemaining % 60;
+  useEffect(
+    function () {
+      const id = setInterval(function () {
+        setSecondsRemaining((secondsRemaining) => {
+          return secondsRemaining - 1;
+        });
+      }, 1000);
 
-    return function () {
-      clearInterval(id);
-    };
-  }, []);
+      return function () {
+        clearInterval(id);
+      };
+    },
+    [secondsRemaining]
+  );
+
+  useEffect(
+    function () {
+      if (secondsRemaining === 0) {
+        dispatch({ type: "finished" });
+      }
+    },
+    [secondsRemaining]
+  );
 
   return (
     <div className="timer">
